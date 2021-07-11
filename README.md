@@ -1,4 +1,4 @@
 # cs166-project
 ## STARTING ER DIAGRAM
 --
-![SCREENSHOT](./PHASE_1_ER_DIAGRAM.pdf)
+[embed](./PHASE_1_ER_DIAGRAM.pdf)[/embed]
