@@ -1,8 +1,3 @@
 # cs166-project
-## STARTING ER DIAGRAM
-<object data="https://github.com/giathuan123/cs166-project/blob/master/p1_sol.pdf" type="application/pdf" width="700px" height="700px">
-    <embed src="https://github.com/giathuan123/cs166-project/blob/master/p1_sol.pdf">
-        <p>This browser does not support PDFs. Please download the PDF to view it: <a href="https://github.com/giathuan123/cs166-project/blob/master/p1_sol.pdf">Download PDF</a>.</p>
-    </embed>
-</object>
-
+##ER DIAGRAM
+![alt text](p1_sol.png)
