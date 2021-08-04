@@ -1,3 +1,6 @@
-/code/data
-/code/postgresql
-/code/sql
+code/java/bin
+code/java/*.sh
+code/sql/create.sql
+code/data
+code/postgresql
+code/sql
