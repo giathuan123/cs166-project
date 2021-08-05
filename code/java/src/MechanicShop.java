@@ -168,7 +168,7 @@ public class MechanicShop{
 		int rowCount = 0;
 
 		//iterates through the result set and count nuber of results.
-		if(rs.next()){
+		while(rs.next()){
 			rowCount++;
 		}//end while
 		stmt.close ();
@@ -304,8 +304,25 @@ public class MechanicShop{
 		return input;
 	}//end readChoice
 	
+  private static String getStringInput(String prompt, int bounds) throws Exception{
+    System.out.print(prompt); 
+    String answer = in.readLine();
+    if(answer.length() > bounds) throw new Exception("Exceed length");
+    return answer;
+  }
 	public static void AddCustomer(MechanicShop esql){//1
-		
+      try{
+        int insertRow = esql.executeQuery("SELECT * FROM customer;");
+        String firstName = getStringInput("Please enter your first name: ", 32);
+        String lastName = getStringInput("Please enter your last name: ", 32);
+        String phoneNumber = getStringInput("Please enter your phone: ", 13);
+        String address = getStringInput("Please enter your address: ", 256);
+        String query = "INSERT INTO customer(id, fname, lname, phone, address) VALUES (" + insertRow + ",'" + firstName + "','" + lastName + "','" + phoneNumber + "','" + address + "');";
+        esql.executeUpdate(query);
+      }catch(Exception e){
+        System.out.println(e.getMessage());
+        //ignored
+      }
 	}
 	
 	public static void AddMechanic(MechanicShop esql){//2
