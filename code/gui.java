@@ -33,7 +33,7 @@ public class gui{
     mainLabel.setVerticalAlignment(JLabel.CENTER);
     mainLabel.setFont(new Font("Courier", Font.PLAIN, 20));
     JPanel addCustomerPane = new JPanel();
-    addCustomerPane.setLayout(new GridLayout(7, 1, 0, 15));
+    addCustomerPane.setLayout(new GridLayout(7, 1));
     addCustomerPane.setBackground(new Color(0xffffff));
     addCustomerPane.setBounds(25, 25, 450, 400);
     addCustomerPane.add(mainLabel);
@@ -50,10 +50,25 @@ public class gui{
     phoneNumber.setBorder(new TitledBorder("Enter phone number"));
     addCustomerPane.add(phoneNumber);
     // Address
-    JTextField address = new JTextField(256);
+    JTextArea address = new JTextArea();
+    JScrollPane scroll = new JScrollPane(address);
+    scroll.setBorder(BorderFactory.createEmptyBorder());
     address.setBorder(new TitledBorder("Enter address"));
-    addCustomerPane.add(address);
+    addCustomerPane.add(scroll);
+
     JButton submissionButton = new JButton("Add customer");
+
+    submissionButton.addActionListener((e)->{
+      String firstNameStr = firstName.getText();
+      String lastNameStr = lastName.getText();
+      String phoneNumberStr = phoneNumber.getText();
+      String addressStr = address.getText();
+      System.out.println(firstNameStr);
+      System.out.println(lastNameStr);
+      System.out.println(phoneNumberStr);
+      System.out.println(addressStr);
+    });
+
     addCustomerPane.add(submissionButton);
 
     return addCustomerPane;
@@ -78,12 +93,24 @@ public class gui{
     JTextField lastName = new JTextField(32);
     lastName.setBorder(new TitledBorder("Enter last name"));
     addMechanicPane.add(lastName);
-    // Phone Number
+    // Experience
     JTextField experience = new JTextField(5);
     experience.setBorder(new TitledBorder("Enter years of experience"));
     addMechanicPane.add(experience);
-
     JButton submissionButton = new JButton("Add mechanic");
+
+    submissionButton.addActionListener((e)->{
+      try{
+      String firstNameStr = firstName.getText();
+      String lastNameStr = lastName.getText();
+      int experienceInt = Integer.parseInt(experience.getText());
+      System.out.println(firstNameStr);
+      System.out.println(lastNameStr);
+      System.out.println(experienceInt);
+      }catch(Exception exc){
+        System.out.println(exc.getMessage());
+      }
+    });
     addMechanicPane.add(submissionButton);
 
     return addMechanicPane;
@@ -114,6 +141,14 @@ public class gui{
     addCarPane.add(carModel);
 
     JButton submissionButton = new JButton("Add car");
+    submissionButton.addActionListener((e)->{
+      String vinNumberStr = vinNumber.getText();
+      String carMakeStr = carMake.getText();
+      String carModelStr = carModel.getText();
+      System.out.println(vinNumberStr) ;
+      System.out.println(carMakeStr);
+      System.out.println(carModelStr);
+    });
     addCarPane.add(submissionButton);
 
     return addCarPane;
