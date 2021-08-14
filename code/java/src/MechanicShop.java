@@ -1,3 +1,4 @@
+package java.src;
 /*
  * Template JAVA User Interface
  * =============================
@@ -9,7 +10,6 @@
  * Target DBMS: 'Postgres'
  *
  */
-
 
 import java.sql.DriverManager;
 import java.sql.Connection;
@@ -304,19 +304,26 @@ public class MechanicShop{
 		return input;
 	}//end readChoice
 	
-  private static String getStringInput(String prompt, int bounds) throws Exception{
+  private static String getStringInput(String prompt, int bounds, boolean checkDigits) throws Exception{
     System.out.print(prompt); 
     String answer = in.readLine();
+    if(checkDigits){
+      try{
+        Integer.parseInt(prompt);
+      }catch(NumberFormatException e){
+        throw new Exception("String not numeric");
+      }
+    } 
     if(answer.length() > bounds) throw new Exception("Exceed length");
     return answer;
   }
 	public static void AddCustomer(MechanicShop esql){//1
       try{
         int insertRow = esql.executeQuery("SELECT * FROM customer;");
-        String firstName = getStringInput("Please enter your first name: ", 32);
-        String lastName = getStringInput("Please enter your last name: ", 32);
-        String phoneNumber = getStringInput("Please enter your phone: ", 13);
-        String address = getStringInput("Please enter your address: ", 256);
+        String firstName = getStringInput("Please enter your first name: ", 32, false);
+        String lastName = getStringInput("Please enter your last name: ", 32, false);
+        String phoneNumber = getStringInput("Please enter your phone: ", 13, true);
+        String address = getStringInput("Please enter your address: ", 256, false);
         String query = "INSERT INTO customer(id, fname, lname, phone, address) VALUES (" + insertRow + ",'" + firstName + "','" + lastName + "','" + phoneNumber + "','" + address + "');";
         esql.executeUpdate(query);
       }catch(Exception e){
