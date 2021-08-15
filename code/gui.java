@@ -1,12 +1,15 @@
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import javax.swing.border.TitledBorder;
-
-import java.awt.GridLayout;
-import java.awt.Color;
-import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class gui{
-  private static JFrame mainFrame = null; private static JPanel childFrame = null;
+  private static JFrame mainFrame = null;
+  private static JPanel childFrame = null;
+  private static Color background = new Color(0xeeeeee);
   static final JButton[] buttons = new JButton[7];
   static final JButton backButton = new JButton("Go Back");
   static final String[] promptLine = {
@@ -22,8 +25,6 @@ public class gui{
     mainFrame  = new JFrame("Vroom Dealer's DBMS");
     mainFrame.setResizable(false);
     mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    mainFrame.setLayout(null);
-    mainFrame.setLocation(400, 400);
     mainFrame.setSize(500,500);
   }
   // Option 1
@@ -33,32 +34,38 @@ public class gui{
     mainLabel.setVerticalAlignment(JLabel.CENTER);
     mainLabel.setFont(new Font("Courier", Font.PLAIN, 20));
     JPanel addCustomerPane = new JPanel();
-    addCustomerPane.setLayout(new GridLayout(7, 1));
-    addCustomerPane.setBackground(new Color(0xffffff));
-    addCustomerPane.setBounds(25, 25, 450, 400);
+    addCustomerPane.setLayout(new GridLayout(7, 1, 0, 15));
+    addCustomerPane.setSize(450, 400);
+    addCustomerPane.setLocation(25, 25);
+    addCustomerPane.setBorder(new EmptyBorder(25, 25, 25, 25));
     addCustomerPane.add(mainLabel);
     // First Name,
     JTextField firstName = new JTextField(32);
     firstName.setBorder(new TitledBorder("Enter first name"));
+    firstName.setBackground(background);
     addCustomerPane.add(firstName);
     // Last Name
     JTextField lastName = new JTextField(32);
     lastName.setBorder(new TitledBorder("Enter last name"));
+    lastName.setBackground(background);
     addCustomerPane.add(lastName);
     // Phone Number
     JTextField phoneNumber = new JTextField(13);
     phoneNumber.setBorder(new TitledBorder("Enter phone number"));
+    phoneNumber.setBackground(background);
     addCustomerPane.add(phoneNumber);
     // Address
     JTextArea address = new JTextArea();
     JScrollPane scroll = new JScrollPane(address);
     scroll.setBorder(BorderFactory.createEmptyBorder());
     address.setBorder(new TitledBorder("Enter address"));
+    address.setBackground(background);
     addCustomerPane.add(scroll);
 
     JButton submissionButton = new JButton("Add customer");
 
     submissionButton.addActionListener((e)->{
+      try{
       String firstNameStr = firstName.getText();
       String lastNameStr = lastName.getText();
       String phoneNumberStr = phoneNumber.getText();
@@ -67,6 +74,9 @@ public class gui{
       System.out.println(lastNameStr);
       System.out.println(phoneNumberStr);
       System.out.println(addressStr);
+      }catch(Exception exc){
+
+      }
     });
 
     addCustomerPane.add(submissionButton);
@@ -80,38 +90,52 @@ public class gui{
     mainLabel.setVerticalAlignment(JLabel.CENTER);
     mainLabel.setFont(new Font("Courier", Font.PLAIN, 20));
     JPanel addMechanicPane = new JPanel();
-    addMechanicPane.setLayout(new GridLayout(7, 1, 0, 15));
-    addMechanicPane.setBackground(new Color(0xffffff));
-    addMechanicPane.setBounds(25, 25, 450, 400);
+    GridLayout gridLayout = new GridLayout(6, 1, 0 , 15);
+    addMechanicPane.setLayout(gridLayout);
+    addMechanicPane.setLocation(25, 25);
+    addMechanicPane.setSize(450, 400);
+    addMechanicPane.setBorder(new EmptyBorder(25, 25, 25, 25));
     addMechanicPane.add(mainLabel);
 
     // First Name,
     JTextField firstName = new JTextField(32);
     firstName.setBorder(new TitledBorder("Enter first name"));
+    firstName.setBackground(background);
     addMechanicPane.add(firstName);
     // Last Name
     JTextField lastName = new JTextField(32);
     lastName.setBorder(new TitledBorder("Enter last name"));
+    lastName.setBackground(background);
     addMechanicPane.add(lastName);
     // Experience
     JTextField experience = new JTextField(5);
     experience.setBorder(new TitledBorder("Enter years of experience"));
     addMechanicPane.add(experience);
     JButton submissionButton = new JButton("Add mechanic");
+    experience.setBackground(background);
+    Color orButtonColor = submissionButton.getBackground();
+    addMechanicPane.add(submissionButton);
 
     submissionButton.addActionListener((e)->{
       try{
-      String firstNameStr = firstName.getText();
-      String lastNameStr = lastName.getText();
-      int experienceInt = Integer.parseInt(experience.getText());
-      System.out.println(firstNameStr);
-      System.out.println(lastNameStr);
-      System.out.println(experienceInt);
+        String firstNameStr = firstName.getText();
+        String lastNameStr = lastName.getText();
+        int experienceInt = Integer.parseInt(experience.getText());
+        submissionButton.setBackground(Color.green);
+        // NEED DBMS LOGIC
+        Timer timer = new Timer(500, event->{submissionButton.setBackground(orButtonColor);});
+        timer.setRepeats(false);
+        timer.start();
+
       }catch(Exception exc){
-        System.out.println(exc.getMessage());
+        submissionButton.setText("Error");
+        Timer timer2 = new Timer(500, event->{submissionButton.setText("Add mechanic");submissionButton.setBackground(orButtonColor);});
+        timer2.setRepeats(false);
+        timer2.start();
+        submissionButton.setBackground(Color.RED);
       }
+
     });
-    addMechanicPane.add(submissionButton);
 
     return addMechanicPane;
   }
@@ -122,32 +146,40 @@ public class gui{
     mainLabel.setVerticalAlignment(JLabel.CENTER);
     mainLabel.setFont(new Font("Courier", Font.PLAIN, 20));
     JPanel addCarPane = new JPanel();
-    addCarPane.setLayout(new GridLayout(7, 1, 0, 15));
-    addCarPane.setBackground(new Color(0xffffff));
-    addCarPane.setBounds(25, 25, 450, 400);
+    addCarPane.setLayout(new GridLayout(6, 1, 0, 15));
+    addCarPane.setSize(450, 400);
+    addCarPane.setLocation(25, 25);
+    addCarPane.setBorder(new EmptyBorder(25, 25, 25, 25));
     addCarPane.add(mainLabel);
 
     // VIN NUMBER,
     JTextField vinNumber = new JTextField(32);
     vinNumber.setBorder(new TitledBorder("Enter VIN number"));
+    vinNumber.setBackground(background);
     addCarPane.add(vinNumber);
     // MAKE
     JTextField carMake = new JTextField(32);
     carMake.setBorder(new TitledBorder("Enter car make"));
+    carMake.setBackground(background);
     addCarPane.add(carMake);
     // MODEL 
     JTextField carModel = new JTextField(15);
     carModel.setBorder(new TitledBorder("Enter car model"));
+    carModel.setBackground(background);
     addCarPane.add(carModel);
 
     JButton submissionButton = new JButton("Add car");
     submissionButton.addActionListener((e)->{
+      try{
       String vinNumberStr = vinNumber.getText();
       String carMakeStr = carMake.getText();
       String carModelStr = carModel.getText();
       System.out.println(vinNumberStr) ;
       System.out.println(carMakeStr);
       System.out.println(carModelStr);
+      }catch(Exception exc){
+
+      }
     });
     addCarPane.add(submissionButton);
 
@@ -157,7 +189,9 @@ public class gui{
   private static JPanel insertServiceRequestPane(){
     JLabel mainLabel = new JLabel(promptLine[3]);
     JPanel insertServiceRequestPane = new JPanel();
-    insertServiceRequestPane.setBounds(25, 25, 450, 400);
+    insertServiceRequestPane.setSize(450, 400);
+    insertServiceRequestPane.setLocation(25, 25);
+    insertServiceRequestPane.setBorder(new EmptyBorder(25, 25, 25, 25));
     insertServiceRequestPane.add(mainLabel);
     return insertServiceRequestPane;
   }
@@ -177,16 +211,39 @@ public class gui{
     displayResultPane.add(mainLabel);
     return displayResultPane;
   }
+  private static class ButtonActionListener implements ActionListener{
+    private int page;
+    public static JPanel[] internalPanel = null;
+    public ButtonActionListener(int page){
+      this.page = page;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e){
+      if(internalPanel == null){
+        System.out.println("[ButtonActionListener] internalPanel not initialized");
+        return;
+      }else{
+        internalPanel[page].add(backButton);
+        mainFrame.setContentPane(internalPanel[page]);
+        mainFrame.revalidate();
+        mainFrame.repaint();
+      }
+      return;
+    }
+  }
   private static void addChildFrame(){
     childFrame = new JPanel();
-    childFrame.setBackground(new Color(0xFFFFFF));
-    childFrame.setBounds(25, 25, 450, 400);
+    childFrame.setLocation(25, 25);
+    childFrame.setBorder(new EmptyBorder(25, 25, 25, 25));
+    childFrame.setSize(450, 400);
     childFrame.setLayout(new GridLayout(8, 1, 0, 15));
     JLabel label = new JLabel("Choose your option!");
     label.setHorizontalAlignment(JLabel.CENTER);
     label.setVerticalAlignment(JLabel.CENTER);
     label.setFont(new Font("Courier", Font.PLAIN, 20));
     childFrame.add(label);
+
     for(int i = 0; i < 7; i++) {
       buttons[i] = new JButton(promptLine[i]);
       buttons[i].setBounds(5, 5, 90, 200);
@@ -194,16 +251,23 @@ public class gui{
     }
     mainFrame.add(childFrame);
   }
-  public static void main(String[] args) {
-    //Create and set up the window.
-    createMainFrame();
+  public static void initBackButton(){
     backButton.addActionListener(e->{
-      mainFrame.remove(mainFrame.getContentPane());
-      mainFrame.repaint();
       mainFrame.setContentPane(childFrame);
+      mainFrame.revalidate();
+      mainFrame.repaint();
     });
-    addChildFrame();
-    JPanel[] internalPanel = {
+    return;
+  }
+
+  public static void initPages(){
+    for(int i = 0; i < 7; i++){
+      buttons[i].addActionListener(new ButtonActionListener(i));
+    }
+    return;
+  }
+  public static void initInternalPanes(){
+    ButtonActionListener.internalPanel = new JPanel[]{
             addCustomerPane(),
             addMechanicPane(),
             addCarPane(),
@@ -212,49 +276,14 @@ public class gui{
             displayResultPane("Display 1"),
             displayResultPane("Display 2")
     };
-
-    buttons[0].addActionListener(e->{
-      internalPanel[0].add(backButton);
-      mainFrame.remove(childFrame);
-      mainFrame.repaint();
-      mainFrame.setContentPane(internalPanel[0]);
-    });
-    buttons[1].addActionListener(e->{
-      internalPanel[1].add(backButton);
-      mainFrame.remove(childFrame);
-      mainFrame.repaint();
-      mainFrame.setContentPane(internalPanel[1]);
-    });
-    buttons[2].addActionListener(e->{
-      internalPanel[2].add(backButton);
-      mainFrame.remove(childFrame);
-      mainFrame.repaint();
-      mainFrame.setContentPane(internalPanel[2]);
-    });
-    buttons[3].addActionListener(e->{
-      internalPanel[3].add(backButton);
-      mainFrame.remove(childFrame);
-      mainFrame.repaint();
-      mainFrame.setContentPane(internalPanel[3]);
-    });
-    buttons[4].addActionListener(e->{
-      internalPanel[4].add(backButton);
-      mainFrame.remove(childFrame);
-      mainFrame.repaint();
-      mainFrame.setContentPane(internalPanel[4]);
-    });
-    buttons[5].addActionListener(e->{
-      internalPanel[5].add(backButton);
-      mainFrame.remove(childFrame);
-      mainFrame.repaint();
-      mainFrame.setContentPane(internalPanel[5]);
-    });
-    buttons[6].addActionListener(e->{
-      internalPanel[6].add(backButton);
-      mainFrame.remove(childFrame);
-      mainFrame.repaint();
-      mainFrame.setContentPane(internalPanel[6]);
-    });
+  }
+  public static void main(String[] args) {
+    //Create and set up the window.
+    createMainFrame();
+    initBackButton();
+    addChildFrame();
+    initInternalPanes();
+    initPages();
     mainFrame.setVisible(true);
   }
 }
