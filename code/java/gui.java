@@ -20,7 +20,7 @@ public class gui{
     "Close a service request",
     "List customers with bills less than 100",
     "List customers with more than 20 cars",
-    "List Make, Model, and Year of all cars build before 1995 having less than 50000 miles",
+    "<html><center>List Make, Model, and Year of all cars build before 1995 having less than 50000 miles</center></html>",
     "<html><center>List Make, model and number of service requests for the first " + 
     "<br>k cars with the highest number of service orders</center></html>",
     "<html><center>List the first name, last name and total bill of customers in descending " + 
@@ -263,7 +263,7 @@ public class gui{
     JLabel mainLabel = new JLabel(title);
     mainLabel.setHorizontalAlignment(JLabel.CENTER);
     mainLabel.setVerticalAlignment(JLabel.CENTER);
-    mainLabel.setFont(new Font("Courier", Font.PLAIN, 20));
+    mainLabel.setFont(new Font("Courier", Font.PLAIN, 15));
     JPanel displayResultPane = new JPanel();
     displayResultPane.setLayout(new GridLayout(3, 1, 0, 15));
     displayResultPane.setBorder(new EmptyBorder(25, 25, 25, 25));
@@ -293,9 +293,7 @@ public class gui{
   }
   private static void addChildFrame(){
     childFrame = new JPanel();
-    // childFrame.setLocation(25, 25);
     childFrame.setBorder(new EmptyBorder(25, 25, 25, 25));
-    // childFrame.setSize(650, 400);
     childFrame.setLayout(new GridLayout(11, 1, 0, 15));
     JLabel label = new JLabel("Choose your option!");
     label.setHorizontalAlignment(JLabel.CENTER);
@@ -332,11 +330,11 @@ public class gui{
             addCarPane(),      // option 3
             insertServiceRequestPane(), // option 4
             closeServiceRequestPane(),  // option 5
-            displayResultPane("Display 1"), // option 6
-            displayResultPane("Display 2"), // option 7
-            displayResultPane("Display 3"), // option 8
-            displayResultPane("Display 4"), // option 9
-            displayResultPane("Display 5"), // option 10
+            displayResultPane(promptLine[5]), // option 6
+            displayResultPane(promptLine[6]), // option 7
+            displayResultPane(promptLine[7]), // option 8
+            displayResultPane(promptLine[8]), // option 9
+            displayResultPane(promptLine[9]), // option 10
     };
   }
   public static void main(String[] args) {
@@ -346,6 +344,18 @@ public class gui{
     addChildFrame();
     initInternalPanes();
     initPages();
+    // LISTING require injecting database response into gui
+    buttons[5].addActionListener((e)->{
+      ButtonActionListener.internalPanel[5].add(new JButton("Something is here to stay"));
+    });
+    buttons[6].addActionListener((e)->{
+    });
+    buttons[7].addActionListener((e)->{
+    });
+    buttons[8].addActionListener((e)->{
+    });
+    buttons[9].addActionListener((e)->{
+    });
     mainFrame.setVisible(true);
   }
 }
