@@ -1,4 +1,3 @@
-package java.src;
 /*
  * Template JAVA User Interface
  * =============================
@@ -99,13 +98,14 @@ public class MechanicShop{
 		while (rs.next()){
 			if(outputHeader){
 				for(int i = 1; i <= numCol; i++){
-					System.out.print(rsmd.getColumnName(i) + "\t");
+					System.out.print(rsmd.getColumnName(i) + "\t\t");
 			    }
 			    System.out.println();
 			    outputHeader = false;
 			}
-			for (int i=1; i<=numCol; ++i)
-				System.out.print (rs.getString (i) + "\t");
+			for (int i=1; i<=numCol; ++i){
+				System.out.print (rs.getString (i).trim() + "\t\t");
+      }
 			System.out.println ();
 			++rowCount;
 		}//end while
@@ -135,10 +135,8 @@ public class MechanicShop{
 		*/ 
 		ResultSetMetaData rsmd = rs.getMetaData (); 
 		int numCol = rsmd.getColumnCount (); 
-		int rowCount = 0; 
 	 
 		//iterates through the result set and saves the data returned by the query. 
-		boolean outputHeader = false;
 		List<List<String>> result  = new ArrayList<List<String>>(); 
 		while (rs.next()){
 			List<String> record = new ArrayList<String>(); 
@@ -309,8 +307,9 @@ public class MechanicShop{
     String answer = in.readLine();
     if(checkDigits){
       try{
-        Integer.parseInt(prompt);
+        Integer.parseInt(answer);
       }catch(NumberFormatException e){
+        System.out.println(e);
         throw new Exception("String not numeric");
       }
     } 
@@ -333,15 +332,75 @@ public class MechanicShop{
 	}
 	
 	public static void AddMechanic(MechanicShop esql){//2
-		
+		try{
+        int insertRow = esql.executeQuery("SELECT * FROM mechanic;");
+        String firstName = getStringInput("Please enter mechanic's first name: ", 32, false);
+        String lastName = getStringInput("Please enter mechanic's last name: ", 32, false);
+        int experience = Integer.parseInt(getStringInput("Please enter years of experience: ", 13, true));
+        String query = "INSERT INTO mechanic(id, fname, lname, experience) VALUES ('" + insertRow + "','" + firstName + "','" + lastName + "'," + experience + ";";
+        esql.executeUpdate(query);
+      }catch(Exception e){
+        System.out.println(e.getMessage());
+        //ignored
+      }
 	}
 	
 	public static void AddCar(MechanicShop esql){//3
-		
+		try{
+        String carVin = getStringInput("Please enter car VIN: ", 32, false);
+        String carMake = getStringInput("Please enter car make: ", 32, false);
+        String carModel = getStringInput("Please enter car model", 32, false);
+        int carYear = Integer.parseInt(getStringInput("Please enter years: ", 13, true));
+        String query = "INSERT INTO car(vin, make, model, year) VALUES ('" + carVin + "','" + carMake + "','" + carModel + "'," + carYear + ";";
+        esql.executeUpdate(query);
+      }catch(Exception e){
+        System.out.println(e.getMessage());
+        //ignored
+      }
 	}
 	
 	public static void InsertServiceRequest(MechanicShop esql){//4
-		
+	   try{
+       String customerLastName = getStringInput("Please enter customer last name: ", 32, false);
+       String query = "SELECT id, fname, lname from customer where lname='"+customerLastName + "';";
+       List<List<String>> result = esql.executeQueryAndReturnResult(query);
+       System.out.printf("%20s%5s%25s%25s\n", "Selection", "ID", "First Name", "Last Name");
+       for(int rows = 0; rows < result.size(); rows++){
+         List<String> r = result.get(rows);
+         String customerId = r.get(0);
+         String firstName = r.get(1);
+         String lastName = r.get(2);
+         System.out.printf("%20s%5s%25s%25s\n", Integer.toString(rows), customerId, firstName.trim(), lastName.trim());
+       }
+       System.out.println();
+       int selectionNo = Integer.parseInt(getStringInput("Please enter selection number: ", 10, true));
+       String customer_id = result.get(selectionNo).get(0);
+
+       String queryCustomerCar = "select make, model, year, vin from owns, car where customer_id="+ customer_id + "and car_vin = vin";
+       List<List<String>> resultCar = esql.executeQueryAndReturnResult(queryCustomerCar);
+       System.out.printf("%20s%15s%15s%10s%25s\n", "Selection", "Make", "Model", "Year", "VIN");
+       for(int rows = 0; rows < resultCar.size(); rows++){
+         List<String> r = resultCar.get(rows);
+         String carMake = r.get(0);
+         String carModel = r.get(1);
+         String carYear = r.get(2);
+         String carVin = r.get(3);
+         System.out.printf("%20s%15s%15s%10s%25s\n", Integer.toString(rows), carMake, carModel, carYear, carVin);
+       }
+       System.out.println();
+       int carSelectionNo = Integer.parseInt(getStringInput("Please enter car selection number: ", 10, true));
+
+       String carVin = resultCar.get(carSelectionNo).get(3);
+       String mileage = getStringInput("Please enter mileage: ", 10, true);
+       String complain = getStringInput("Please enter problem: ", 256, false);
+       System.out.println("Inserting Service Request");
+       System.out.println("Car Vin: " + carVin);
+       System.out.println("Customer ID: " + customer_id);
+       System.out.println("Mileage: " + mileage);
+       System.out.println("Complain: " + complain);
+     }catch(Exception e){
+        System.out.println(e.getMessage());
+     }	
 	}
 	
 	public static void CloseServiceRequest(MechanicShop esql) throws Exception{//5

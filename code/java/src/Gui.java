@@ -1,12 +1,11 @@
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import javax.swing.border.TitledBorder;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class gui{
+public class Gui{
   private static JFrame mainFrame = null;
   private static JPanel childFrame = null;
   private static Color background = new Color(0xeeeeee);
