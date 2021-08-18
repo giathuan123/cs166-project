@@ -1,16 +1,23 @@
+package src;
+
 import javax.swing.*;
+import javax.swing.text.MaskFormatter;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
 import javax.swing.border.TitledBorder;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.sql.SQLException;
+import java.awt.*;
 
 public class Gui{
+
   private static JFrame mainFrame = null;
   private static JPanel childFrame = null;
   private static Color background = new Color(0xeeeeee);
+  private static MechanicShop esql = null;
   static final JButton[] buttons = new JButton[10];
   static final JButton backButton = new JButton("Go Back");
+  static final Color orButtonColor = backButton.getBackground();
   static final String[] promptLine = {
     "Add a customer",
     "Add a mechanic",
@@ -51,8 +58,14 @@ public class Gui{
     lastName.setBorder(new TitledBorder("Enter last name"));
     lastName.setBackground(background);
     addCustomerPane.add(lastName);
+    MaskFormatter phoneFmt = null;
+    try{
+      phoneFmt = new MaskFormatter("(###)###-####");
+    }catch(Exception e){
+      
+    }
     // Phone Number
-    JTextField phoneNumber = new JTextField(13);
+    JFormattedTextField phoneNumber = new JFormattedTextField(phoneFmt);
     phoneNumber.setBorder(new TitledBorder("Enter phone number"));
     phoneNumber.setBackground(background);
     addCustomerPane.add(phoneNumber);
@@ -68,18 +81,41 @@ public class Gui{
     JButton submissionButton = new JButton("Add customer");
     submissionButton.addActionListener((e)->{
       try{
-      String firstNameStr = firstName.getText();
-      String lastNameStr = lastName.getText();
-      String phoneNumberStr = phoneNumber.getText();
-      String addressStr = address.getText();
-      System.out.println(firstNameStr);
-      System.out.println(lastNameStr);
-      System.out.println(phoneNumberStr);
-      System.out.println(addressStr);
+        String firstNameStr = firstName.getText();
+        String lastNameStr = lastName.getText();
+        String phoneNumberStr = phoneNumber.getText();
+        String addressStr = address.getText();
+        if(firstNameStr.length() == 0 || firstNameStr.length() > 32) throw new Exception("Field Error");
+        if(lastNameStr.length() == 0 || lastNameStr.length() > 32) throw new Exception("Field Error");
+        if(addressStr.length() == 0 || addressStr.length() > 256) throw new Exception("Field Error");
+        String query = "INSERT INTO customer(fname, lname, phone, address) VALUES ('" 
+                         + firstNameStr + "','" + lastNameStr + 
+                        "','" + phoneNumberStr + "','" + addressStr + "');";
+        esql.executeUpdate(query);
+        submissionButton.setBackground(Color.green);
+        // NEED DBMS LOGIC
+        Timer timer = new Timer(500, event->{
+                        firstName.setText("");
+                        lastName.setText("");
+                        phoneNumber.setText("");
+                        address.setText("");
+                        submissionButton.setBackground(orButtonColor);
+                        });
+        timer.setRepeats(false);
+        timer.start();
+        System.out.println("[INFO] customer inserted: " + firstNameStr + "," + lastNameStr + ", " + phoneNumberStr + ", " + addressStr);
       }catch(Exception exc){
-
-      }
-    });
+        submissionButton.setText("Error");
+        Timer timer2 = new Timer(500, event->{
+                              submissionButton.setText("Add mechanic");
+                              submissionButton.setBackground(orButtonColor);
+                              });
+        timer2.setRepeats(false);
+        timer2.start();
+        System.out.println("[ERROR] customer not inserted: " + exc.getMessage());
+        submissionButton.setBackground(Color.RED);
+        }
+      });
     addCustomerPane.add(submissionButton);
 
     return addCustomerPane;
@@ -113,7 +149,6 @@ public class Gui{
     // Submission Button
     JButton submissionButton = new JButton("Add mechanic");
     experience.setBackground(background);
-    Color orButtonColor = submissionButton.getBackground();
     addMechanicPane.add(submissionButton);
 
     submissionButton.addActionListener((e)->{
@@ -121,20 +156,34 @@ public class Gui{
         String firstNameStr = firstName.getText();
         String lastNameStr = lastName.getText();
         int experienceInt = Integer.parseInt(experience.getText());
+        if(firstNameStr.length() == 0 || firstNameStr.length() > 32) throw new Exception("Field Error");
+        if(lastNameStr.length() == 0 || lastNameStr.length() > 32) throw new Exception("Field Error");
+        if(experience.getText().length() == 0 || experience.getText().length() > 3 || experienceInt > 100 || experienceInt < 0) throw new Exception("Field Error");
         submissionButton.setBackground(Color.green);
         // NEED DBMS LOGIC
-        Timer timer = new Timer(500, event->{submissionButton.setBackground(orButtonColor);});
+        String query = "INSERT INTO mechanic(fname, lname, experience) VALUES ('" + 
+                        firstNameStr + "','" + lastNameStr + "'," + experienceInt + ");";
+        esql.executeUpdate(query);
+        Timer timer = new Timer(500, event->{
+              firstName.setText("");
+              lastName.setText("");
+              experience.setText("");
+              submissionButton.setBackground(orButtonColor);
+            });
         timer.setRepeats(false);
         timer.start();
-
+        System.out.println("[INFO] mechanic inserted: " + firstNameStr + "," + lastNameStr + ", " + experienceInt);
       }catch(Exception exc){
+        System.out.println("[ERROR] mechanic not inserted: " + exc.getMessage());
         submissionButton.setText("Error");
-        Timer timer2 = new Timer(500, event->{submissionButton.setText("Add mechanic");submissionButton.setBackground(orButtonColor);});
+        submissionButton.setBackground(Color.RED);
+        Timer timer2 = new Timer(500, event->{
+          submissionButton.setText("Add mechanic");
+          submissionButton.setBackground(orButtonColor);
+        });
         timer2.setRepeats(false);
         timer2.start();
-        submissionButton.setBackground(Color.RED);
       }
-
     });
 
     return addMechanicPane;
@@ -146,12 +195,12 @@ public class Gui{
     mainLabel.setVerticalAlignment(JLabel.CENTER);
     mainLabel.setFont(new Font("Courier", Font.PLAIN, 20));
     JPanel addCarPane = new JPanel();
-    addCarPane.setLayout(new GridLayout(6, 1, 0, 15));
+    addCarPane.setLayout(new GridLayout(7, 1, 0, 15));
     addCarPane.setBorder(new EmptyBorder(25, 25, 25, 25));
     addCarPane.add(mainLabel);
 
     // VIN NUMBER,
-    JTextField vinNumber = new JTextField(32);
+    JTextField vinNumber = new JTextField(16);
     vinNumber.setBorder(new TitledBorder("Enter VIN number"));
     vinNumber.setBackground(background);
     addCarPane.add(vinNumber);
@@ -161,24 +210,54 @@ public class Gui{
     carMake.setBackground(background);
     addCarPane.add(carMake);
     // MODEL 
-    JTextField carModel = new JTextField(15);
+    JTextField carModel = new JTextField(32);
     carModel.setBorder(new TitledBorder("Enter car model"));
     carModel.setBackground(background);
     addCarPane.add(carModel);
+    // YEAR
+    JTextField carYear = new JTextField(4);
+    carYear.setBorder(new TitledBorder("Enter car year"));
+    carYear.setBackground(background);
+    addCarPane.add(carYear);
     // SUBMISSION BUTTON
     JButton submissionButton = new JButton("Add car");
     submissionButton.addActionListener((e)->{
       try{
-      String vinNumberStr = vinNumber.getText();
-      String carMakeStr = carMake.getText();
-      String carModelStr = carModel.getText();
-      System.out.println(vinNumberStr) ;
-      System.out.println(carMakeStr);
-      System.out.println(carModelStr);
+        String vinNumberStr = vinNumber.getText();
+        String carMakeStr = carMake.getText();
+        String carModelStr = carModel.getText();
+        int carYearInt = Integer.parseInt(carYear.getText());
+        if(vinNumberStr.length() != 16) throw new Exception("Field Error");
+        if(carMakeStr.length() == 0 || carMakeStr.length() > 32) throw new Exception("Field Error");
+        if(carModelStr.length() == 0 || carModelStr.length() > 32) throw new Exception("Field Error");
+        if(carYear.getText().length() != 4 || carYearInt < 1970) throw new Exception("Field Error");
+        String query = "INSERT INTO car(vin, make, model, year) VALUES ('" + 
+                        vinNumberStr + "','" + carMakeStr + "','" + 
+                        carModelStr + "'," + carYearInt + ");";
+        esql.executeUpdate(query);
+        Timer timer = new Timer(500, event->{
+              submissionButton.setBackground(orButtonColor);
+              vinNumber.setText("");
+              carMake.setText("");
+              carModel.setText("");
+              carYear.setText("");
+            });
+        timer.setRepeats(false);
+        timer.start();
+        System.out.println("[INFO] car inserted: " + vinNumberStr + "," + carMakeStr + ", " + carModelStr);
       }catch(Exception exc){
-
+        System.out.println("[ERROR] car not inserted: " + exc.getMessage());
+        submissionButton.setText("Error");
+        Timer timer2 = new Timer(500, event->{
+          submissionButton.setText("Add car");
+          submissionButton.setBackground(orButtonColor);
+        });
+        timer2.setRepeats(false);
+        timer2.start();
+        submissionButton.setBackground(Color.RED);
       }
     });
+
     addCarPane.add(submissionButton);
 
     return addCarPane;
@@ -336,8 +415,19 @@ public class Gui{
             displayResultPane(promptLine[9]), // option 10
     };
   }
+  public static JTable addTableQuery(String query){
+    return new JTable();
+  }
   public static void main(String[] args) {
     //Create and set up the window.
+    try{
+      String dbname = args[0];
+      String dbport = args[1];
+      String dbuser = args[2];
+      esql = new MechanicShop(dbname, dbport, dbuser, "");
+    }catch(SQLException e){
+
+    }
     createMainFrame();
     initBackButton();
     addChildFrame();
@@ -345,7 +435,7 @@ public class Gui{
     initPages();
     // LISTING require injecting database response into gui
     buttons[5].addActionListener((e)->{
-      ButtonActionListener.internalPanel[5].add(new JButton("Something is here to stay"));
+      ButtonActionListener.internalPanel[5].add(addTableQuery("Query"));
     });
     buttons[6].addActionListener((e)->{
     });

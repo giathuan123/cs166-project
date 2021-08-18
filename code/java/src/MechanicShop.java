@@ -1,3 +1,4 @@
+package src;
 /*
  * Template JAVA User Interface
  * =============================
@@ -16,8 +17,6 @@ import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.io.File;
-import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
@@ -318,12 +317,11 @@ public class MechanicShop{
   }
 	public static void AddCustomer(MechanicShop esql){//1
       try{
-        int insertRow = esql.executeQuery("SELECT * FROM customer;");
         String firstName = getStringInput("Please enter your first name: ", 32, false);
         String lastName = getStringInput("Please enter your last name: ", 32, false);
         String phoneNumber = getStringInput("Please enter your phone: ", 13, true);
         String address = getStringInput("Please enter your address: ", 256, false);
-        String query = "INSERT INTO customer(id, fname, lname, phone, address) VALUES (" + insertRow + ",'" + firstName + "','" + lastName + "','" + phoneNumber + "','" + address + "');";
+        String query = "INSERT INTO customer(fname, lname, phone, address) VALUES ('" + firstName + "','" + lastName + "','" + phoneNumber + "','" + address + "');";
         esql.executeUpdate(query);
       }catch(Exception e){
         System.out.println(e.getMessage());
@@ -337,7 +335,7 @@ public class MechanicShop{
         String firstName = getStringInput("Please enter mechanic's first name: ", 32, false);
         String lastName = getStringInput("Please enter mechanic's last name: ", 32, false);
         int experience = Integer.parseInt(getStringInput("Please enter years of experience: ", 13, true));
-        String query = "INSERT INTO mechanic(id, fname, lname, experience) VALUES ('" + insertRow + "','" + firstName + "','" + lastName + "'," + experience + ";";
+        String query = "INSERT INTO mechanic(fname, lname, experience) VALUES ('" + firstName + "','" + lastName + "'," + experience + ";";
         esql.executeUpdate(query);
       }catch(Exception e){
         System.out.println(e.getMessage());
@@ -393,6 +391,7 @@ public class MechanicShop{
        String carVin = resultCar.get(carSelectionNo).get(3);
        String mileage = getStringInput("Please enter mileage: ", 10, true);
        String complain = getStringInput("Please enter problem: ", 256, false);
+       // NEED INSERTION LOGIC
        System.out.println("Inserting Service Request");
        System.out.println("Car Vin: " + carVin);
        System.out.println("Customer ID: " + customer_id);
