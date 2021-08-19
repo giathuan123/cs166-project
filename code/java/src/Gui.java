@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
 import java.awt.*;
+import java.util.List;
 
 public class Gui{
 
@@ -24,9 +25,10 @@ public class Gui{
     "Add a car",
     "Insert a service request",
     "Close a service request",
-    "List customers with bills less than 100",
+    "<html><center>List date, comment, and bill for all <br>"
+    + "closed request with bill lower than 100</center><html>",
     "List customers with more than 20 cars",
-    "<html><center>List Make, Model, and Year of all cars build before 1995 having less than 50000 miles</center></html>",
+    "<html><center>List Make, Model, and Year of all cars build before <br>1995 having less than 50000 miles</center></html>",
     "<html><center>List Make, model and number of service requests for the first " + 
     "<br>k cars with the highest number of service orders</center></html>",
     "<html><center>List the first name, last name and total bill of customers in descending " + 
@@ -37,6 +39,22 @@ public class Gui{
     mainFrame.setResizable(false);
     mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     mainFrame.setSize(700,600);
+  }
+  private static void addTableToDisplayPane(JPanel internalPanel, JScrollPane table){
+    JPanel displayPanel =  (JPanel) internalPanel.getComponents()[1];
+    displayPanel.removeAll();
+    displayPanel.setLayout(new GridLayout(1,1));
+    displayPanel.add(table); 
+  }
+  private static MaskFormatter createMaskFormatter(String fmt){
+    MaskFormatter mFmt = null;
+    try{
+      mFmt = new MaskFormatter(fmt);
+    }catch(Exception e){
+      System.out.println(e.getMessage());
+      System.out.println("Can't create format: " + fmt);
+    }
+    return mFmt;
   }
   // Option 1
   private static JPanel addCustomerPane(){
@@ -58,12 +76,7 @@ public class Gui{
     lastName.setBorder(new TitledBorder("Enter last name"));
     lastName.setBackground(background);
     addCustomerPane.add(lastName);
-    MaskFormatter phoneFmt = null;
-    try{
-      phoneFmt = new MaskFormatter("(###)###-####");
-    }catch(Exception e){
-      
-    }
+    MaskFormatter phoneFmt = createMaskFormatter("(###)###-####");
     // Phone Number
     JFormattedTextField phoneNumber = new JFormattedTextField(phoneFmt);
     phoneNumber.setBorder(new TitledBorder("Enter phone number"));
@@ -85,9 +98,12 @@ public class Gui{
         String lastNameStr = lastName.getText();
         String phoneNumberStr = phoneNumber.getText();
         String addressStr = address.getText();
-        if(firstNameStr.length() == 0 || firstNameStr.length() > 32) throw new Exception("Field Error");
-        if(lastNameStr.length() == 0 || lastNameStr.length() > 32) throw new Exception("Field Error");
-        if(addressStr.length() == 0 || addressStr.length() > 256) throw new Exception("Field Error");
+        if(firstNameStr.length() == 0 || firstNameStr.length() > 32) 
+          throw new Exception("First name can't be empty and must have no more than 32 characters");
+        if(lastNameStr.length() == 0 || lastNameStr.length() > 32) 
+          throw new Exception("Last name can't be empty and must have no more than 32 characters");
+        if(addressStr.length() == 0 || addressStr.length() > 256) 
+          throw new Exception("Address can't be empty and must have no more than 256t words");
         String query = "INSERT INTO customer(fname, lname, phone, address) VALUES ('" 
                          + firstNameStr + "','" + lastNameStr + 
                         "','" + phoneNumberStr + "','" + addressStr + "');";
@@ -105,7 +121,7 @@ public class Gui{
         timer.start();
         System.out.println("[INFO] customer inserted: " + firstNameStr + "," + lastNameStr + ", " + phoneNumberStr + ", " + addressStr);
       }catch(Exception exc){
-        submissionButton.setText("Error");
+        submissionButton.setText(exc.getMessage());
         Timer timer2 = new Timer(500, event->{
                               submissionButton.setText("Add mechanic");
                               submissionButton.setBackground(orButtonColor);
@@ -155,10 +171,13 @@ public class Gui{
       try{
         String firstNameStr = firstName.getText();
         String lastNameStr = lastName.getText();
-        int experienceInt = Integer.parseInt(experience.getText());
-        if(firstNameStr.length() == 0 || firstNameStr.length() > 32) throw new Exception("Field Error");
-        if(lastNameStr.length() == 0 || lastNameStr.length() > 32) throw new Exception("Field Error");
-        if(experience.getText().length() == 0 || experience.getText().length() > 3 || experienceInt > 100 || experienceInt < 0) throw new Exception("Field Error");
+        int experienceInt = Integer.parseInt((experience.getText().equals("") ? "0": experience.getText()));
+        if(firstNameStr.length() == 0 || firstNameStr.length() > 32) 
+          throw new Exception("First name can't be empty and must have no more than 32 characters");
+        if(lastNameStr.length() == 0 || lastNameStr.length() > 32) 
+          throw new Exception("Last name can't be empty and must have no more than 32 characters");
+        if(experience.getText().length() == 0 || experience.getText().length() > 3 || experienceInt > 100 || experienceInt < 0) 
+          throw new Exception("Mechanic experience must be within 0 to 100 years");
         submissionButton.setBackground(Color.green);
         // NEED DBMS LOGIC
         String query = "INSERT INTO mechanic(fname, lname, experience) VALUES ('" + 
@@ -175,9 +194,9 @@ public class Gui{
         System.out.println("[INFO] mechanic inserted: " + firstNameStr + "," + lastNameStr + ", " + experienceInt);
       }catch(Exception exc){
         System.out.println("[ERROR] mechanic not inserted: " + exc.getMessage());
-        submissionButton.setText("Error");
+        submissionButton.setText(exc.getMessage());
         submissionButton.setBackground(Color.RED);
-        Timer timer2 = new Timer(500, event->{
+        Timer timer2 = new Timer(900, event->{
           submissionButton.setText("Add mechanic");
           submissionButton.setBackground(orButtonColor);
         });
@@ -226,15 +245,21 @@ public class Gui{
         String vinNumberStr = vinNumber.getText();
         String carMakeStr = carMake.getText();
         String carModelStr = carModel.getText();
-        int carYearInt = Integer.parseInt(carYear.getText());
-        if(vinNumberStr.length() != 16) throw new Exception("Field Error");
-        if(carMakeStr.length() == 0 || carMakeStr.length() > 32) throw new Exception("Field Error");
-        if(carModelStr.length() == 0 || carModelStr.length() > 32) throw new Exception("Field Error");
-        if(carYear.getText().length() != 4 || carYearInt < 1970) throw new Exception("Field Error");
+        int carYearInt = Integer.parseInt((carYear.getText().equals("")?"0":carYear.getText()));
+        if(vinNumberStr.length() != 16) 
+          throw new Exception("VIN number must have 16 characters");
+        if(carMakeStr.length() == 0 || carMakeStr.length() > 32) 
+          throw new Exception("Car make can't be empty and no more than 32 characters");
+        if(carModelStr.length() == 0 || carModelStr.length() > 32) 
+          throw new Exception("Car model can't be empty and no more than 32 characters");
+        if(carYear.getText().length() != 4 || carYearInt < 1970) 
+          throw new Exception("Car year must be after 1970");
+        // DBMS LOGIC
         String query = "INSERT INTO car(vin, make, model, year) VALUES ('" + 
                         vinNumberStr + "','" + carMakeStr + "','" + 
                         carModelStr + "'," + carYearInt + ");";
         esql.executeUpdate(query);
+        // SUCCESS
         Timer timer = new Timer(500, event->{
               submissionButton.setBackground(orButtonColor);
               vinNumber.setText("");
@@ -247,7 +272,7 @@ public class Gui{
         System.out.println("[INFO] car inserted: " + vinNumberStr + "," + carMakeStr + ", " + carModelStr);
       }catch(Exception exc){
         System.out.println("[ERROR] car not inserted: " + exc.getMessage());
-        submissionButton.setText("Error");
+        submissionButton.setText(exc.getMessage());
         Timer timer2 = new Timer(500, event->{
           submissionButton.setText("Add car");
           submissionButton.setBackground(orButtonColor);
@@ -338,14 +363,32 @@ public class Gui{
   }
   // Option 6,7
   private static JPanel displayResultPane(String title){
+    // main label
     JLabel mainLabel = new JLabel(title);
     mainLabel.setHorizontalAlignment(JLabel.CENTER);
+    mainLabel.setBackground(Color.RED);
     mainLabel.setVerticalAlignment(JLabel.CENTER);
     mainLabel.setFont(new Font("Courier", Font.PLAIN, 15));
+    // parent display panel  
     JPanel displayResultPane = new JPanel();
-    displayResultPane.setLayout(new GridLayout(3, 1, 0, 15));
     displayResultPane.setBorder(new EmptyBorder(25, 25, 25, 25));
-    displayResultPane.add(mainLabel);
+    displayResultPane.setSize(450,400);
+    displayResultPane.setLayout(new GridBagLayout());
+    GridBagConstraints constraints = new GridBagConstraints();
+    // middle display panel
+    JPanel displayPanel = new JPanel();
+    displayPanel.setBackground(Color.red);
+    constraints.gridx = 0;
+    constraints.gridy = 0;
+    constraints.gridwidth = GridBagConstraints.REMAINDER;
+    constraints.weightx = 1;
+    displayResultPane.add(mainLabel, constraints);
+    constraints.gridx = 0;
+    constraints.gridy = 1;
+    constraints.weighty=1;
+    constraints.weightx=1;
+    constraints.fill = GridBagConstraints.BOTH;
+    displayResultPane.add(displayPanel, constraints);
     return displayResultPane;
   }
   private static class ButtonActionListener implements ActionListener{
@@ -415,8 +458,13 @@ public class Gui{
             displayResultPane(promptLine[9]), // option 10
     };
   }
-  public static JTable addTableQuery(String query){
-    return new JTable();
+  public static JScrollPane addTableQuery(String query, String[] col) throws SQLException{
+    List<List<String>> data = esql.executeQueryAndReturnResult(query);
+    String[][] stringData = data.stream().map(l->l.toArray(new String[l.size()])).toArray(String[][]::new);
+    JTable dataTable = new JTable(stringData, col);
+    JScrollPane tablePane = new JScrollPane(dataTable);
+    tablePane.setBorder(BorderFactory.createEmptyBorder());
+    return tablePane;
   }
   public static void main(String[] args) {
     //Create and set up the window.
@@ -435,16 +483,41 @@ public class Gui{
     initPages();
     // LISTING require injecting database response into gui
     buttons[5].addActionListener((e)->{
-      ButtonActionListener.internalPanel[5].add(addTableQuery("Query"));
+      try{
+      addTableToDisplayPane(ButtonActionListener.internalPanel[5], addTableQuery("select date, comment, bill from closed_request where bill<100;", new String[] {"Date", "Comment", "Bill"}));
+      }catch(SQLException exc){
+        System.out.println(exc.getMessage());
+      }
     });
     buttons[6].addActionListener((e)->{
+      try{
+      addTableToDisplayPane(ButtonActionListener.internalPanel[6], addTableQuery("select fname, lname, noCars from customer, (select customer_id, count(*) as noCars from owns group by customer_id having count(*) > 20) as o  where o.customer_id = id;", new String[] {"First name", "Last name","number of cars"}));
+      }catch(SQLException exc){
+        System.out.println(exc.getMessage());
+      }
     });
     buttons[7].addActionListener((e)->{
+      try{
+      addTableToDisplayPane(ButtonActionListener.internalPanel[7], addTableQuery("select make, model, year, cur_miles from car C, (select car_vin, max(odometer) as cur_miles  from service_request group by car_vin) as cm where C.year < 1995 and C.vin = cm.car_vin and cur_miles < 50000;", new String[] {"Make", "Model", "Year", "Mileage"}));
+      }catch(SQLException exc){
+        System.out.println(exc.getMessage());
+      }
     });
     buttons[8].addActionListener((e)->{
+      try{
+      addTableToDisplayPane(ButtonActionListener.internalPanel[8], addTableQuery("select distinct make, model, noService from car, (select car_vin, count(*) as noService from service_request group by car_vin) as cm where car_vin = vin order by noService desc limit 10;", new String[] {"Make", "Model","number of services"}));
+      }catch(SQLException exc){
+        System.out.println(exc.getMessage());
+      }
     });
     buttons[9].addActionListener((e)->{
+      try{
+      addTableToDisplayPane(ButtonActionListener.internalPanel[9], addTableQuery("select fname, lname, totalBills from customer,(select sum(bill) as totalBills, customer_id from closed_request C, service_request S where C.rid = S.rid group by customer_id) as bills where customer_id = id order by totalBills desc;", new String[] {"First name", "Last Name","Total Bills"}));
+      }catch(SQLException exc){
+        System.out.println(exc.getMessage());
+      }
     });
     mainFrame.setVisible(true);
   }
 }
+

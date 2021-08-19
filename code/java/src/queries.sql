@@ -1,5 +1,5 @@
 -- Option 6
-select data, comment, bill from closed_requests where bill < 100;
+select date, comment, bill from closed_requests where bill < 100;
 -- Option 7
 select fname, lname from customer, (select customer_id, count(*) from owns group by customer_id having count(*) > 20) as o  where o.customer_id = id;
 -- Option 8
