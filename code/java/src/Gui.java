@@ -308,6 +308,8 @@ public class Gui{
     lastName.setBorder(BorderFactory.createTitledBorder("Enter customer's lastname"));
     lastName.setBackground(background);
     // Submission Button
+    JButton addCustomerButton = new JButton("Add customer");
+    addCustomerButton.addActionListener(new ButtonActionListener(0));
     JButton submissionButton = new JButton("Get customers");
     submissionButton.addActionListener(
         (e)->{
@@ -338,7 +340,7 @@ public class Gui{
                   mainFrame.repaint();
                   carButton.addActionListener((e2)->{
                     String vin = (String) carTable.getValueAt(carTable.getSelectedRow(),0);
-                    JPanel servicePane = servicePane();
+                    JPanel servicePane = servicePane(vin, id);
                     servicePane.add(backButton);
                     mainFrame.setContentPane(servicePane);
                     mainFrame.revalidate();
@@ -362,10 +364,11 @@ public class Gui{
         });
     // adding childrens
     insertServiceRequestPane.add(lastName);
+    insertServiceRequestPane.add(addCustomerButton);
     insertServiceRequestPane.add(submissionButton);
     return insertServiceRequestPane;
   }
-  private static JPanel servicePane(){
+  private static JPanel servicePane(String vin, String cid){
     // main label
     JLabel innerLabel = new JLabel("Service Info");
     innerLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -398,8 +401,40 @@ public class Gui{
     complains.setBackground(background);
     servicePane.add(scroll);
     // Submission Button
-    JButton insertButton = new JButton("Add service requests");
-
+    JButton insertButton = new JButton("Add service request");
+    insertButton.addActionListener((e)->{
+      try{
+      int mileageInt = Integer.parseInt(mileage.getText());
+      String dateStr = date.getText();
+      String complainStr = complains.getText();
+      if(mileageInt < 0) 
+        throw new Exception("Mileage can't be negative");
+      String query = "INSERT INTO service_request(customer_id, car_vin, odometer, date, complain) VALUES (" 
+        + cid + ",'" + vin + "'," + mileageInt + ",'" + dateStr + "','" + complainStr + "');";
+      esql.executeUpdate(query);
+      insertButton.setBackground(Color.green);
+      // NEED DBMS LOGIC
+      Timer timer = new Timer(500, event->{
+        date.setText("");
+        mileage.setText("");
+        complains.setText("");
+        insertButton.setBackground(orButtonColor);
+      });
+      timer.setRepeats(false);
+      timer.start();
+      System.out.println("[INFO] service_request inserted: " + cid + "," + vin + ", " + mileageInt + ", " + dateStr + ", " + complainStr);
+      }catch(Exception exc){
+        System.out.println("[ERROR] service_request not inserted: " + exc.getMessage());
+        insertButton.setText(exc.getMessage());
+        Timer timer2 = new Timer(500, event->{
+          insertButton.setText("Add service request");
+          insertButton.setBackground(orButtonColor);
+        });
+        timer2.setRepeats(false);
+        timer2.start();
+        insertButton.setBackground(Color.RED);
+      }
+    });
     servicePane.add(date);
     servicePane.add(mileage);
     servicePane.add(complains);
@@ -411,10 +446,11 @@ public class Gui{
     JLabel mainLabel = new JLabel(promptLine[4]);
     mainLabel.setHorizontalAlignment(JLabel.CENTER);
     mainLabel.setVerticalAlignment(JLabel.CENTER);
+    mainLabel.setBackground(Color.RED);
     mainLabel.setFont(new Font("Courier", Font.PLAIN, 20));
 
     JPanel closeServiceRequestPane = new JPanel();
-    closeServiceRequestPane.setLayout(new GridLayout(5, 1, 0, 15));
+    closeServiceRequestPane.setLayout(new GridLayout(8, 1, 0, 25));
     closeServiceRequestPane.setBorder(new EmptyBorder(25, 25, 25, 25));
     closeServiceRequestPane.add(mainLabel);
 
@@ -427,7 +463,24 @@ public class Gui{
     JTextField mechanicId = new JTextField(13);
     mechanicId.setBorder(BorderFactory.createTitledBorder("Enter mechanic's employee id"));
     mechanicId.setBackground(background);
-
+    // date
+    MaskFormatter dateFmt = createMaskFormatter("####-##-##");
+    SimpleDateFormat dFormatter = new SimpleDateFormat("yyyy-MM-dd");
+    Date dateNow = new Date(System.currentTimeMillis());
+    dateFmt.setPlaceholder(dFormatter.format(dateNow));
+    JFormattedTextField date = new JFormattedTextField(dateFmt);
+    date.setBorder(BorderFactory.createTitledBorder("Enter closing date"));
+    date.setBackground(background);
+    // comment
+    JTextArea comment = new JTextArea();
+    JScrollPane scroll = new JScrollPane(comment);
+    scroll.setBorder(BorderFactory.createEmptyBorder());
+    comment.setBorder(new TitledBorder("Enter comment"));
+    comment.setBackground(background);
+    // bill
+    JTextField billing = new JTextField(10);
+    billing.setBorder(BorderFactory.createTitledBorder("Enter billing"));
+    billing.setBackground(background);
     // submission button
     JButton submissionButton = new JButton("Close service request");
     submissionButton.addActionListener(
@@ -435,14 +488,40 @@ public class Gui{
           try{
             String requestIdStr = requestId.getText();
             String mechanicIdStr = mechanicId.getText();
-            System.out.println(requestIdStr);
-            System.out.println(mechanicIdStr);
+            String dateStr = date.getText();
+            String commentStr = comment.getText();
+            int billingInt = Integer.parseInt(billing.getText());
+            String insertQuery = "INSERT INTO closed_request(rid, mid, date, bill, comment) VALUES (" + requestIdStr + "," + mechanicIdStr + ",'" + dateStr + "'," + billingInt + ",'" + commentStr + "');";
+            esql.executeUpdate(insertQuery);
+            submissionButton.setBackground(Color.green);
+            // NEED DBMS LOGIC
+            Timer timer = new Timer(800, event->{
+              requestId.setText("");
+              mechanicId.setText("");
+              billing.setText("");
+              comment.setText("");
+              submissionButton.setBackground(orButtonColor);
+            });
+            timer.setRepeats(false);
+            timer.start();
+            System.out.println("[INFO] service_request close: " + requestIdStr + "," + mechanicIdStr + ",'" + dateStr + "'," + billingInt + ",'" + commentStr + "';");
           }catch(Exception exc){
-
+            System.out.println("[ERROR] service_request not closed: " + exc.getMessage());
+            submissionButton.setText(exc.getMessage());
+            submissionButton.setBackground(Color.RED);
+            Timer timer2 = new Timer(500, event->{
+              submissionButton.setText("Close service request");
+              submissionButton.setBackground(orButtonColor);
+            });
+            timer2.setRepeats(false);
+            timer2.start();
           }
         });
     closeServiceRequestPane.add(requestId);
     closeServiceRequestPane.add(mechanicId);
+    closeServiceRequestPane.add(date);
+    closeServiceRequestPane.add(billing);
+    closeServiceRequestPane.add(scroll);
     closeServiceRequestPane.add(submissionButton);
     return closeServiceRequestPane;
   }
@@ -531,7 +610,7 @@ public class Gui{
   }
   public static void initInternalPanes(){
     ButtonActionListener.internalPanel = new JPanel[]{
-      addCustomerPane(), // option 1
+        addCustomerPane(), // option 1
         addMechanicPane(), // option 2
         addCarPane(),      // option 3
         insertServiceRequestPane(), // option 4
@@ -565,6 +644,7 @@ public class Gui{
     initBackButton();
     addChildFrame();
     initInternalPanes();
+    initKPane();
     initPages();
     // LISTING require injecting database response into gui
     buttons[5].addActionListener((e)->{
@@ -603,6 +683,44 @@ public class Gui{
       }
     });
     mainFrame.setVisible(true);
+  }
+  private static void initKPane(){
+        JTextField inputK = new JTextField("10");
+        inputK.setBorder(BorderFactory.createTitledBorder("Enter k value"));
+        inputK.setBackground(background);
+        JButton inputButton = new JButton("Get Data");
+        inputButton.addActionListener(event->{
+            try{
+              int k = Integer.parseInt(inputK.getText());
+              addTableToDisplayPane(ButtonActionListener.internalPanel[8], addTableQuery("select distinct make, model, noService from car, (select car_vin, count(*) as noService from service_request group by car_vin) as cm where car_vin = vin order by noService desc limit "+k+";", new String[] {"Make", "Model","number of services"}));
+              mainFrame.revalidate();
+              mainFrame.repaint();
+             Timer timer = new Timer(500, event2->{
+                inputButton.setBackground(orButtonColor);
+              });
+              timer.setRepeats(false);
+              timer.start();
+              System.out.println("[INFO] k value query: " + k);
+              }catch(Exception exc){
+                System.out.println("[ERROR] k value error" + exc.getMessage());
+                inputButton.setText(exc.getMessage());
+                inputButton.setBackground(Color.RED);
+                Timer timer2 = new Timer(500, event3->{
+                  inputButton.setText("Get Data");
+                  inputButton.setBackground(orButtonColor);
+                });
+                timer2.setRepeats(false);
+                timer2.start();
+              }
+        });
+        GridBagConstraints gc = new GridBagConstraints();
+        gc.weightx = 0.1;
+        gc.fill = GridBagConstraints.BOTH;
+        ButtonActionListener.internalPanel[8].add(inputK, gc);
+        gc.weightx = 0.1;
+        gc.fill = GridBagConstraints.NONE;
+        gc.anchor = GridBagConstraints.WEST;
+        ButtonActionListener.internalPanel[8].add(inputButton, gc);
   }
 }
 
