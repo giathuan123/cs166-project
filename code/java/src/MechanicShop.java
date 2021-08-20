@@ -331,7 +331,6 @@ public class MechanicShop{
 	
 	public static void AddMechanic(MechanicShop esql){//2
 		try{
-        int insertRow = esql.executeQuery("SELECT * FROM mechanic;");
         String firstName = getStringInput("Please enter mechanic's first name: ", 32, false);
         String lastName = getStringInput("Please enter mechanic's last name: ", 32, false);
         int experience = Integer.parseInt(getStringInput("Please enter years of experience: ", 13, true));

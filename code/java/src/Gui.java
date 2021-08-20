@@ -1,5 +1,6 @@
 package src;
 
+import java.util.Date;
 import javax.swing.*;
 import javax.swing.text.MaskFormatter;
 import javax.swing.border.EmptyBorder;
@@ -7,6 +8,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.awt.*;
 import java.util.List;
 
@@ -26,13 +28,13 @@ public class Gui{
     "Insert a service request",
     "Close a service request",
     "<html><center>List date, comment, and bill for all <br>"
-    + "closed request with bill lower than 100</center><html>",
+      + "closed request with bill lower than 100</center><html>",
     "List customers with more than 20 cars",
     "<html><center>List Make, Model, and Year of all cars build before <br>1995 having less than 50000 miles</center></html>",
     "<html><center>List Make, model and number of service requests for the first " + 
-    "<br>k cars with the highest number of service orders</center></html>",
+      "<br>k cars with the highest number of service orders</center></html>",
     "<html><center>List the first name, last name and total bill of customers in descending " + 
-    "<br>order of their total bill for all cars brought to the mechanic</center></html>"
+      "<br>order of their total bill for all cars brought to the mechanic</center></html>"
   };
   private static void createMainFrame(){
     mainFrame  = new JFrame("Vroom Dealer's DBMS");
@@ -105,33 +107,33 @@ public class Gui{
         if(addressStr.length() == 0 || addressStr.length() > 256) 
           throw new Exception("Address can't be empty and must have no more than 256t words");
         String query = "INSERT INTO customer(fname, lname, phone, address) VALUES ('" 
-                         + firstNameStr + "','" + lastNameStr + 
-                        "','" + phoneNumberStr + "','" + addressStr + "');";
+          + firstNameStr + "','" + lastNameStr + 
+          "','" + phoneNumberStr + "','" + addressStr + "');";
         esql.executeUpdate(query);
         submissionButton.setBackground(Color.green);
         // NEED DBMS LOGIC
         Timer timer = new Timer(500, event->{
-                        firstName.setText("");
-                        lastName.setText("");
-                        phoneNumber.setText("");
-                        address.setText("");
-                        submissionButton.setBackground(orButtonColor);
-                        });
+          firstName.setText("");
+          lastName.setText("");
+          phoneNumber.setText("");
+          address.setText("");
+          submissionButton.setBackground(orButtonColor);
+        });
         timer.setRepeats(false);
         timer.start();
         System.out.println("[INFO] customer inserted: " + firstNameStr + "," + lastNameStr + ", " + phoneNumberStr + ", " + addressStr);
       }catch(Exception exc){
         submissionButton.setText(exc.getMessage());
         Timer timer2 = new Timer(500, event->{
-                              submissionButton.setText("Add mechanic");
-                              submissionButton.setBackground(orButtonColor);
-                              });
+          submissionButton.setText("Add mechanic");
+          submissionButton.setBackground(orButtonColor);
+        });
         timer2.setRepeats(false);
         timer2.start();
         System.out.println("[ERROR] customer not inserted: " + exc.getMessage());
         submissionButton.setBackground(Color.RED);
-        }
-      });
+      }
+    });
     addCustomerPane.add(submissionButton);
 
     return addCustomerPane;
@@ -181,14 +183,14 @@ public class Gui{
         submissionButton.setBackground(Color.green);
         // NEED DBMS LOGIC
         String query = "INSERT INTO mechanic(fname, lname, experience) VALUES ('" + 
-                        firstNameStr + "','" + lastNameStr + "'," + experienceInt + ");";
+          firstNameStr + "','" + lastNameStr + "'," + experienceInt + ");";
         esql.executeUpdate(query);
         Timer timer = new Timer(500, event->{
-              firstName.setText("");
-              lastName.setText("");
-              experience.setText("");
-              submissionButton.setBackground(orButtonColor);
-            });
+          firstName.setText("");
+          lastName.setText("");
+          experience.setText("");
+          submissionButton.setBackground(orButtonColor);
+        });
         timer.setRepeats(false);
         timer.start();
         System.out.println("[INFO] mechanic inserted: " + firstNameStr + "," + lastNameStr + ", " + experienceInt);
@@ -256,17 +258,17 @@ public class Gui{
           throw new Exception("Car year must be after 1970");
         // DBMS LOGIC
         String query = "INSERT INTO car(vin, make, model, year) VALUES ('" + 
-                        vinNumberStr + "','" + carMakeStr + "','" + 
-                        carModelStr + "'," + carYearInt + ");";
+          vinNumberStr + "','" + carMakeStr + "','" + 
+          carModelStr + "'," + carYearInt + ");";
         esql.executeUpdate(query);
         // SUCCESS
         Timer timer = new Timer(500, event->{
-              submissionButton.setBackground(orButtonColor);
-              vinNumber.setText("");
-              carMake.setText("");
-              carModel.setText("");
-              carYear.setText("");
-            });
+          submissionButton.setBackground(orButtonColor);
+          vinNumber.setText("");
+          carMake.setText("");
+          carModel.setText("");
+          carYear.setText("");
+        });
         timer.setRepeats(false);
         timer.start();
         System.out.println("[INFO] car inserted: " + vinNumberStr + "," + carMakeStr + ", " + carModelStr);
@@ -294,13 +296,13 @@ public class Gui{
     mainLabel.setHorizontalAlignment(JLabel.CENTER);
     mainLabel.setVerticalAlignment(JLabel.CENTER);
     mainLabel.setFont(new Font("Courier", Font.PLAIN, 20));
-    
+
     // main panel
     JPanel insertServiceRequestPane = new JPanel();
-    insertServiceRequestPane.setLayout(new GridLayout(4, 1, 0, 15));
+    insertServiceRequestPane.setLayout(new GridLayout(6, 1, 0, 15));
     insertServiceRequestPane.setBorder(new EmptyBorder(25, 25, 25, 25));
     insertServiceRequestPane.add(mainLabel);
-    
+
     // Customer Last Name
     JTextField lastName = new JTextField(32);
     lastName.setBorder(BorderFactory.createTitledBorder("Enter customer's lastname"));
@@ -311,7 +313,49 @@ public class Gui{
         (e)->{
           try{
             String lastNameStr = lastName.getText();
-            System.out.println(lastNameStr);
+            if(esql.executeQueryAndReturnResult("SELECT id, fname, lname from customer where lname='"+lastNameStr+"';").size() > 0){
+              String[] col = {"ID", "First Name", "Last Name"};
+              JPanel customerListPane = displayResultPane("Select your customer");
+              JScrollPane customerScrollPane = addTableQuery("SELECT id, fname, lname from customer where lname='"+lastNameStr+"';", col );
+              JTable customerTable = (JTable) customerScrollPane.getViewport().getComponents()[0];
+              customerTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+              JButton custButton = new JButton("select customer");
+              addTableToDisplayPane(customerListPane, customerScrollPane);
+              custButton.addActionListener((event)->{
+                try{
+                  String id = customerTable.getValueAt(customerTable.getSelectedRow(), 0).toString();
+                  JPanel carListPane = displayResultPane("Select your car");
+                  String[] carCol = {"VIN", "Make", "Model", "Year"};
+                  JScrollPane carScrollPane = addTableQuery("select vin, make, model, year from owns, car where customer_id="+id+"and car_vin=vin", carCol);
+                  JButton carButton = new JButton("Select car");
+                  JTable carTable = (JTable) carScrollPane.getViewport().getComponents()[0];
+                  carTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                  addTableToDisplayPane(carListPane, carScrollPane);
+                  carListPane.add(backButton);
+                  carListPane.add(carButton);
+                  mainFrame.setContentPane(carListPane);
+                  mainFrame.revalidate();
+                  mainFrame.repaint();
+                  carButton.addActionListener((e2)->{
+                    String vin = (String) carTable.getValueAt(carTable.getSelectedRow(),0);
+                    JPanel servicePane = servicePane();
+                    servicePane.add(backButton);
+                    mainFrame.setContentPane(servicePane);
+                    mainFrame.revalidate();
+                    mainFrame.repaint();
+                  });
+                }catch(Exception exc){
+
+                }
+              });
+              customerListPane.add(backButton);
+              customerListPane.add(custButton);
+              mainFrame.setContentPane(customerListPane);
+              mainFrame.revalidate();
+              mainFrame.repaint();
+            }else{
+
+            } 
           }catch(Exception exc){
 
           }
@@ -320,6 +364,47 @@ public class Gui{
     insertServiceRequestPane.add(lastName);
     insertServiceRequestPane.add(submissionButton);
     return insertServiceRequestPane;
+  }
+  private static JPanel servicePane(){
+    // main label
+    JLabel innerLabel = new JLabel("Service Info");
+    innerLabel.setHorizontalAlignment(JLabel.CENTER);
+    innerLabel.setVerticalAlignment(JLabel.CENTER);
+    innerLabel.setFont(new Font("Courier", Font.PLAIN, 20));
+
+    // main panel
+    JPanel servicePane = new JPanel();
+    servicePane.setLayout(new GridLayout(8, 15));
+    servicePane.setBorder(new EmptyBorder(25, 25, 25, 25));
+    servicePane.add(innerLabel);
+
+    // Date
+    MaskFormatter dateFmt = createMaskFormatter("####-##-##");
+    SimpleDateFormat dFormatter = new SimpleDateFormat("yyyy-MM-dd");
+    Date dateNow = new Date(System.currentTimeMillis());
+    dateFmt.setPlaceholder(dFormatter.format(dateNow));
+    JFormattedTextField date = new JFormattedTextField(dateFmt);
+    date.setBorder(BorderFactory.createTitledBorder("Enter date"));
+    date.setBackground(background);
+    // Mileage
+    JTextField mileage = new JTextField(10);
+    mileage.setBorder(BorderFactory.createTitledBorder("Enter mileage"));
+    mileage.setBackground(background);
+    // Complain 
+    JTextArea complains = new JTextArea();
+    JScrollPane scroll = new JScrollPane(complains);
+    scroll.setBorder(BorderFactory.createEmptyBorder());
+    complains.setBorder(new TitledBorder("Enter complains"));
+    complains.setBackground(background);
+    servicePane.add(scroll);
+    // Submission Button
+    JButton insertButton = new JButton("Add service requests");
+
+    servicePane.add(date);
+    servicePane.add(mileage);
+    servicePane.add(complains);
+    servicePane.add(insertButton);
+    return servicePane;
   }
   // Option 5
   private static JPanel closeServiceRequestPane(){
@@ -337,7 +422,7 @@ public class Gui{
     JTextField requestId = new JTextField(13);
     requestId.setBorder(BorderFactory.createTitledBorder("Enter request id"));
     requestId.setBackground(background);
-    
+
     // mechanic sid
     JTextField mechanicId = new JTextField(13);
     mechanicId.setBorder(BorderFactory.createTitledBorder("Enter mechanic's employee id"));
@@ -446,16 +531,16 @@ public class Gui{
   }
   public static void initInternalPanes(){
     ButtonActionListener.internalPanel = new JPanel[]{
-            addCustomerPane(), // option 1
-            addMechanicPane(), // option 2
-            addCarPane(),      // option 3
-            insertServiceRequestPane(), // option 4
-            closeServiceRequestPane(),  // option 5
-            displayResultPane(promptLine[5]), // option 6
-            displayResultPane(promptLine[6]), // option 7
-            displayResultPane(promptLine[7]), // option 8
-            displayResultPane(promptLine[8]), // option 9
-            displayResultPane(promptLine[9]), // option 10
+      addCustomerPane(), // option 1
+        addMechanicPane(), // option 2
+        addCarPane(),      // option 3
+        insertServiceRequestPane(), // option 4
+        closeServiceRequestPane(),  // option 5
+        displayResultPane(promptLine[5]), // option 6
+        displayResultPane(promptLine[6]), // option 7
+        displayResultPane(promptLine[7]), // option 8
+        displayResultPane(promptLine[8]), // option 9
+        displayResultPane(promptLine[9]), // option 10
     };
   }
   public static JScrollPane addTableQuery(String query, String[] col) throws SQLException{
@@ -484,35 +569,35 @@ public class Gui{
     // LISTING require injecting database response into gui
     buttons[5].addActionListener((e)->{
       try{
-      addTableToDisplayPane(ButtonActionListener.internalPanel[5], addTableQuery("select date, comment, bill from closed_request where bill<100;", new String[] {"Date", "Comment", "Bill"}));
+        addTableToDisplayPane(ButtonActionListener.internalPanel[5], addTableQuery("select date, comment, bill from closed_request where bill<100;", new String[] {"Date", "Comment", "Bill"}));
       }catch(SQLException exc){
         System.out.println(exc.getMessage());
       }
     });
     buttons[6].addActionListener((e)->{
       try{
-      addTableToDisplayPane(ButtonActionListener.internalPanel[6], addTableQuery("select fname, lname, noCars from customer, (select customer_id, count(*) as noCars from owns group by customer_id having count(*) > 20) as o  where o.customer_id = id;", new String[] {"First name", "Last name","number of cars"}));
+        addTableToDisplayPane(ButtonActionListener.internalPanel[6], addTableQuery("select fname, lname, noCars from customer, (select customer_id, count(*) as noCars from owns group by customer_id having count(*) > 20) as o  where o.customer_id = id;", new String[] {"First name", "Last name","number of cars"}));
       }catch(SQLException exc){
         System.out.println(exc.getMessage());
       }
     });
     buttons[7].addActionListener((e)->{
       try{
-      addTableToDisplayPane(ButtonActionListener.internalPanel[7], addTableQuery("select make, model, year, cur_miles from car C, (select car_vin, max(odometer) as cur_miles  from service_request group by car_vin) as cm where C.year < 1995 and C.vin = cm.car_vin and cur_miles < 50000;", new String[] {"Make", "Model", "Year", "Mileage"}));
+        addTableToDisplayPane(ButtonActionListener.internalPanel[7], addTableQuery("select make, model, year, cur_miles from car C, (select car_vin, max(odometer) as cur_miles  from service_request group by car_vin) as cm where C.year < 1995 and C.vin = cm.car_vin and cur_miles < 50000;", new String[] {"Make", "Model", "Year", "Mileage"}));
       }catch(SQLException exc){
         System.out.println(exc.getMessage());
       }
     });
     buttons[8].addActionListener((e)->{
       try{
-      addTableToDisplayPane(ButtonActionListener.internalPanel[8], addTableQuery("select distinct make, model, noService from car, (select car_vin, count(*) as noService from service_request group by car_vin) as cm where car_vin = vin order by noService desc limit 10;", new String[] {"Make", "Model","number of services"}));
+        addTableToDisplayPane(ButtonActionListener.internalPanel[8], addTableQuery("select distinct make, model, noService from car, (select car_vin, count(*) as noService from service_request group by car_vin) as cm where car_vin = vin order by noService desc limit 10;", new String[] {"Make", "Model","number of services"}));
       }catch(SQLException exc){
         System.out.println(exc.getMessage());
       }
     });
     buttons[9].addActionListener((e)->{
       try{
-      addTableToDisplayPane(ButtonActionListener.internalPanel[9], addTableQuery("select fname, lname, totalBills from customer,(select sum(bill) as totalBills, customer_id from closed_request C, service_request S where C.rid = S.rid group by customer_id) as bills where customer_id = id order by totalBills desc;", new String[] {"First name", "Last Name","Total Bills"}));
+        addTableToDisplayPane(ButtonActionListener.internalPanel[9], addTableQuery("select fname, lname, totalBills from customer,(select sum(bill) as totalBills, customer_id from closed_request C, service_request S where C.rid = S.rid group by customer_id) as bills where customer_id = id order by totalBills desc;", new String[] {"First name", "Last Name","Total Bills"}));
       }catch(SQLException exc){
         System.out.println(exc.getMessage());
       }
