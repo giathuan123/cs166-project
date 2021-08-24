@@ -39,15 +39,6 @@ public class Gui{
 		"<html><center>List the first name, last name and total bill of customers in descending " + 
 			"<br>order of their total bill for all cars brought to the mechanic</center></html>"
 	};
-	private static void setUIFont(FontUIResource f){
-		Enumeration<Object> keys = UIManager.getDefaults().keys();
-		while(keys.hasMoreElements()){
-			Object key = keys.nextElement();
-			Object value = UIManager.get(key);
-			if( value instanceof FontUIResource)
-				UIManager.put(key, f);
-		}
-	}
 	private static void createMainFrame(){
 		mainFrame  = new JFrame("Vroom Dealer's DBMS");
 		mainFrame.setResizable(false);
@@ -75,7 +66,6 @@ public class Gui{
 		JLabel mainLabel = new JLabel(promptLine[0]);
 		mainLabel.setHorizontalAlignment(JLabel.CENTER);
 		mainLabel.setVerticalAlignment(JLabel.CENTER);
-		mainLabel.setFont(new Font("Courier", Font.PLAIN, 20));
 		JPanel addCustomerPane = new JPanel();
 		addCustomerPane.setLayout(new GridLayout(7, 1, 0, 15));
 		addCustomerPane.setBorder(new EmptyBorder(25, 25, 25, 25));
@@ -507,6 +497,9 @@ public class Gui{
 				String dateStr = date.getText();
 				String commentStr = comment.getText();
 				int billingInt = Integer.parseInt(billing.getText());
+				if(Integer.parseInt(mechanicIdStr) > 249){
+					throw new Exception("Mechanic does not exist");
+				}
 				String insertQuery = "INSERT INTO closed_request(rid, mid, date, bill, comment) VALUES (" + requestIdStr + "," + mechanicIdStr + ",'" + dateStr + "'," + billingInt + ",'" + commentStr + "');";
 				esql.executeUpdate(insertQuery);
 				submissionButton.setBackground(Color.green);
@@ -698,7 +691,6 @@ public class Gui{
 				System.out.println(exc.getMessage());
 				}
 				});
-		setUIFont(new FontUIResource("Serif", Font.ITALIC, 12));
 		mainFrame.setVisible(true);
 	}
 	private static void initKPane(){
