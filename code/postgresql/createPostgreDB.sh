@@ -1,6 +1,6 @@
 #! /bin/bash
-echo "creating db named ... "$USER"_DB"
-createdb -h localhost -p 5432 $USER"_DB"
+# echo "creating db named ... "$USER"_DB"
+# createdb -h localhost -p 5432 $USER"_DB"
 pg_ctl status
 
 echo "Copying csv files ... "

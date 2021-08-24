@@ -207,7 +207,10 @@ BEGIN
 	IF l_date > new.date THEN
 	RAISE 'INVALID DATE, DATE MUST BE AFTER %', l_date;
 	END IF;
-	RETURN new;
+	IF EXISTS (SELECT 1 FROM closed_request WHERE rid=new.rid) THEN
+	RAISE 'REQUEST % IS ALREADY CLOSED', new.rid;
+	END IF; 
+	RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
 
