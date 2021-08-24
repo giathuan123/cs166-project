@@ -160,11 +160,59 @@ FROM 'closed_request.csv'
 WITH DELIMITER ',';
 
 SELECT setval('closed_request_wid_seq', max(wid)) from Closed_Request;
----------------------
--- SCHEMA TRIGGERS --
----------------------
+-----------------------
+-- SCHEMA CONSTRAITS --
+-----------------------
+-- service_request table --
 -- Constrait 1: mileage of new service_request must be at least
 --              the maximum requests from previous service_request
-
 -- Constrait 2: any date inserted must be before or at the current
 --              date
+-- Constrait 3: customer must be the owner of the car
+CREATE OR REPLACE FUNCTION service_request_check() 
+RETURNS TRIGGER AS $$
+DECLARE
+	l_date DATE;
+	l_mile _PINTEGER;
+BEGIN
+	SELECT MAX(date) FROM service_request INTO l_date WHERE car_vin=new.car_vin;
+	SELECT MAX(odometer) FROM service_request INTO l_mile WHERE car_vin=new.car_vin;
+	IF NOT EXISTS (SELECT 1 FROM OWNS WHERE customer_id=new.customer_id AND car_vin=new.car_vin) THEN
+		RAISE 'CUSTOMER(%)  IS NOT OWNER OF CAR(%)', new.customer_id, new.car_vin;
+	END IF;
+	IF l_mile > new.odometer THEN
+		RAISE 'INVALID MILEAGE, MILEAEGE MUST BE MORE THAN: %', l_mile;
+	END IF;
+	IF l_date > new.date THEN
+	RAISE 'INVALID DATE, DATE MUST BE AFTER %', l_date;
+	END IF;
+	RETURN new;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER service_request_insertion_check
+BEFORE INSERT 
+ON service_request 
+FOR EACH ROW
+EXECUTE PROCEDURE service_request_check();
+
+-- closed_request table --
+-- Constrait 1: any date inserted must be after service_request date
+CREATE OR REPLACE FUNCTION close_request_check() 
+RETURNS TRIGGER AS $$
+DECLARE
+	l_date DATE;
+BEGIN
+	SELECT date FROM service_request INTO l_date WHERE rid=new.rid;
+	IF l_date > new.date THEN
+	RAISE 'INVALID DATE, DATE MUST BE AFTER %', l_date;
+	END IF;
+	RETURN new;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER close_request_insert_check
+BEFORE INSERT 
+ON closed_request
+FOR EACH ROW
+EXECUTE PROCEDURE close_request_check();

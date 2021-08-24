@@ -1,7 +1,10 @@
 package src;
 
 import java.util.Date;
+import java.util.Enumeration;
 import javax.swing.*;
+import javax.swing.UIManager;
+import javax.swing.plaf.FontUIResource;
 import javax.swing.text.MaskFormatter;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
@@ -36,11 +39,20 @@ public class Gui{
     "<html><center>List the first name, last name and total bill of customers in descending " + 
       "<br>order of their total bill for all cars brought to the mechanic</center></html>"
   };
+  private static void setUIFont(FontUIResource f){
+    Enumeration<Object> keys = UIManager.getDefaults().keys();
+    while(keys.hasMoreElements()){
+    	Object key = keys.nextElement();
+	Object value = UIManager.get(key);
+	if( value instanceof FontUIResource)
+		UIManager.put(key, f);
+    }
+  }
   private static void createMainFrame(){
     mainFrame  = new JFrame("Vroom Dealer's DBMS");
     mainFrame.setResizable(false);
     mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    mainFrame.setSize(700,600);
+    mainFrame.setSize(1000,700);
   }
   private static void addTableToDisplayPane(JPanel internalPanel, JScrollPane table){
     JPanel displayPanel =  (JPanel) internalPanel.getComponents()[1];
@@ -682,6 +694,7 @@ public class Gui{
         System.out.println(exc.getMessage());
       }
     });
+    setUIFont(new FontUIResource("Serif", Font.ITALIC, 12));
     mainFrame.setVisible(true);
   }
   private static void initKPane(){

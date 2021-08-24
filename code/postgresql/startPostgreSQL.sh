@@ -11,8 +11,8 @@ echo $folder
 #Initialize folders
 #cp ../data/*.csv $folder/myDB/data
 
-#Initialize DB
-#initdb
+# Initialize DB
+# initdb
 
 sleep 1
 #Start folder
