@@ -1,10 +1,7 @@
 package src;
 
 import java.util.Date;
-import java.util.Enumeration;
 import javax.swing.*;
-import javax.swing.UIManager;
-import javax.swing.plaf.FontUIResource;
 import javax.swing.text.MaskFormatter;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
